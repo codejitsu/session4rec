@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
-PATH_TO_ORIGINAL_DATA = '/Users/alexsverdelov/Downloads/yoochoose-data/'
-PATH_TO_PROCESSED_DATA = '/Users/alexsverdelov/Downloads/yoochoose-data/processed/data/'
+PATH_TO_ORIGINAL_DATA = '/path/to/original/data/'
+PATH_TO_PROCESSED_DATA = '/path/to/processed/data/'
 
 print('Loading data from: {}\nOutput directory: {}'.format(PATH_TO_ORIGINAL_DATA, PATH_TO_PROCESSED_DATA))
 
