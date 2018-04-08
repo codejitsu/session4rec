@@ -105,4 +105,5 @@ data/
 
 # model
 checkpoint
+checkpoint-session/
 model.ckpt.*
