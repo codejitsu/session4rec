@@ -1,5 +1,5 @@
 class Defaults:
-    is_training = True
+    is_training = False
     layers = 1
     rnn_size = 100
     n_epochs = 3

@@ -79,7 +79,7 @@ class Session4RecPredictor:
         ckpt = tf.train.get_checkpoint_state(self.checkpoint_dir)
 
         if ckpt and ckpt.model_checkpoint_path:
-            self.saver.restore(sess, '{}/gru-model-{}'.format(self.checkpoint_dir, defaults.test_model))
+            self.saver.restore(self.sess, '{}/model.ckpt-{}'.format(self.checkpoint_dir, defaults.test_model))
 
     # activation
 
@@ -248,9 +248,51 @@ class Session4RecPredictor:
             save_path = self.saver.save(self.sess, '{}/model.ckpt'.format(self.checkpoint_dir), global_step = epoch)
             print('Model saved to {}'.format(save_path))
 
-if __name__ == '__main__':
-    print('Start session4rec training...')
+    def predict_next_batch(self, session_ids, input_item_ids, itemidmap, batch=50):
+        '''
+        Gives predicton scores for a selected set of items. Can be used in batch mode to predict for multiple independent events (i.e. events of different sessions) at once and thus speed up evaluation.
 
+        If the session ID at a given coordinate of the session_ids parameter remains the same during subsequent calls of the function, the corresponding hidden state of the network will be kept intact (i.e. that's how one can predict an item to a session).
+        If it changes, the hidden state of the network is reset to zeros.
+
+        Parameters
+        --------
+        session_ids : 1D array
+            Contains the session IDs of the events of the batch. Its length must equal to the prediction batch size (batch param).
+        input_item_ids : 1D array
+            Contains the item IDs of the events of the batch. Every item ID must be must be in the training data of the network. Its length must equal to the prediction batch size (batch param).
+        batch : int
+            Prediction batch size.
+
+        Returns
+        --------
+        out : pandas.DataFrame
+            Prediction scores for selected items for every event of the batch.
+            Columns: events of the batch; rows: items. Rows are indexed by the item IDs.
+
+        '''
+        if batch != self.batch_size:
+            raise Exception('Predict batch size({}) must match train batch size({})'.format(batch, self.batch_size))
+        if not self.predict:
+            self.current_session = np.ones(batch) * -1
+            self.predict = True
+
+        session_change = np.arange(batch)[session_ids != self.current_session]
+        if len(session_change) > 0: # change internal states with session changes
+            for i in range(self.layers):
+                self.predict_state[i][session_change] = 0.0
+            self.current_session=session_ids.copy()
+
+        in_idxs = itemidmap[input_item_ids]
+        fetches = [self.yhat, self.final_state]
+        feed_dict = {self.X: in_idxs}
+        for i in range(self.layers):
+            feed_dict[self.state[i]] = self.predict_state[i]
+        preds, self.predict_state = self.sess.run(fetches, feed_dict)
+        preds = np.asarray(preds).T
+        return pd.DataFrame(data=preds, index=itemidmap.index)
+
+if __name__ == '__main__':
     defaults = Defaults()
 
     data = pd.read_csv(PATH_TO_TRAIN, sep='\t', dtype={'ItemId': np.int64})
@@ -269,7 +311,8 @@ if __name__ == '__main__':
         predictor = Session4RecPredictor(defaults, session)
 
         if defaults.is_training:
+            print('Start session4rec training...')
             predictor.train(data)
         else:
-            res = evaluation.evaluate_sessions_batch(gru, data, valid)
+            res = evaluation.evaluate_sessions_batch(predictor, data, valid)
             print('Recall@20: {}\tMRR@20: {}'.format(res[0], res[1]))
