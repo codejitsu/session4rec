@@ -13,6 +13,6 @@ GRu4Rec in Tensorflow
 
 # Results
 
-* loss = top1, rnn-size = 100, epochs = 3
-  Recall@20: 0.4243443414791227
-  MRR@20: 0.10790868224055285
+## loss = top1, rnn-size = 100, epochs = 3
+  - Recall@20: 0.4243443414791227
+  - MRR@20: 0.10790868224055285
