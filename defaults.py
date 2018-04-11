@@ -2,7 +2,7 @@ class Defaults:
     is_training = True
     layers = 1
     rnn_size = 1000
-    n_epochs = 30
+    n_epochs = 3
     batch_size = 50
     dropout_p_hidden = 1
     learning_rate = 0.001
@@ -15,7 +15,7 @@ class Defaults:
     item_key = 'ItemId'
     time_key = 'Time'
     grad_cap = 0
-    test_model = 29
+    test_model = 2
     checkpoint_dir = './checkpoint-session'
     loss = 'top1'
     final_act = 'softmax'

@@ -16,3 +16,7 @@ GRu4Rec in Tensorflow
 ## loss = top1, rnn-size = 100, epochs = 3
   - Recall@20: 0.4243443414791227
   - MRR@20: 0.10790868224055285
+
+# References
+  - Main source: https://github.com/Songweiping/GRU4Rec_TensorFlow
+  - The original implementation: https://github.com/hidasib/GRU4Rec
